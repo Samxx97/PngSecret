@@ -2,8 +2,6 @@ use std::{error::Error, fmt, str::FromStr};
 #[derive(Debug)]
 pub struct ChunkType(u8, u8, u8, u8);
 
-const MASK: u8 = 0b0010_0000 as u8;
-
 impl ChunkType {
 
     fn new(b1: u8, b2: u8, b3: u8, b4: u8) -> Result<Self, ChunkTypeError> {
@@ -49,18 +47,19 @@ impl ChunkType {
     }
 
     pub fn is_critical(&self) -> bool {
-        (self.0 & MASK ) as u8 == 0
+        ( self.0 >> 5 & 1 ) as u8 == 0
     }
 
     pub fn is_public(&self) -> bool {
-        (self.1 & MASK ) as u8 == 0
+        ( self.1 >> 5 & 1 ) as u8 == 0
     }
 
     pub fn is_reserved_bit_valid(&self) -> bool {
-        (self.2 & MASK ) as u8 == 0
+        ( self.2 >> 5 & 1 ) as u8 == 0
     }
+
     pub fn is_safe_to_copy(&self) -> bool {
-        (self.3 & MASK ) as u8 == 32
+        ( self.3 >> 5 & 1 ) as u8 == 1
     }
 }
 
