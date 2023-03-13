@@ -6,7 +6,7 @@ impl ChunkType {
 
     fn new(b1: u8, b2: u8, b3: u8, b4: u8) -> Result<Self, ChunkTypeError> {
         let chunk_type_object = ChunkType(b1, b2, b3, b4);
-        chunk_type_object.of_valid_byte_range()?.of_valid_reserved_bit()?;
+        chunk_type_object.of_valid_byte_range()?;
         Ok(chunk_type_object)
     }
 
