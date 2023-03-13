@@ -5,15 +5,16 @@ pub struct ChunkType(u8, u8, u8, u8);
 impl ChunkType {
 
     fn new(b1: u8, b2: u8, b3: u8, b4: u8) -> Result<Self, ChunkTypeError> {
-
-        ChunkType(b1, b2, b3, b4).of_valid_byte_range()
+        let chunk_type_object = ChunkType(b1, b2, b3, b4);
+        chunk_type_object.of_valid_byte_range()?.of_valid_reserved_bit()?;
+        Ok(chunk_type_object)
     }
 
     pub fn bytes(&self) -> [u8; 4] {
         [self.0, self.1, self.2, self.3]
     }
 
-    fn of_valid_reserved_bit(self) -> Result<Self, ChunkTypeError> {
+    fn of_valid_reserved_bit(&self) -> Result<&Self, ChunkTypeError> {
         if self.is_reserved_bit_valid() {
             Ok(self)
         } else {
@@ -21,7 +22,7 @@ impl ChunkType {
         }
     }
 
-    fn of_valid_byte_range(self) -> Result<Self, ChunkTypeError>{
+    fn of_valid_byte_range(&self) -> Result<&Self, ChunkTypeError>{
         let valid_bytes = self.get_valid_bytes();
         let all_bytes_valid = valid_bytes.iter().fold(true, |result, x| *x && result);
         let result = match all_bytes_valid {
@@ -40,10 +41,8 @@ impl ChunkType {
     }
 
     pub fn is_valid(&self) -> bool {
-        let bytes_valid = self.get_valid_bytes();
-        bytes_valid.iter()
-        .fold(true, |result, x| *x && result)
-         && self.is_reserved_bit_valid()
+        let result = self.of_valid_byte_range().and_then(|val| val.of_valid_reserved_bit().and_then(|__val|Ok(true)));
+        !result.is_err()
     }
 
     pub fn is_critical(&self) -> bool {
